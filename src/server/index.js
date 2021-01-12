@@ -1,19 +1,22 @@
 const config = require("./src/server.config.json");
 
+// TODO: Make it so a users connection will be interupted if a discord ID is not found. Find a more effective way to prevent more than one user from connecting at the same time.
+// Possibly reserve a few slots on the server for staff incase they have to get in server quickly. Add Adaptive Cards.
+
 on('playerConnecting', (name, setKickReason, deferrals) => {
-    deferrals.defer();
-    deferrals.update(`Hello ${name}. Your discord roles are currently being checked...`);
+    deferrals.defer(); // stops the user from being connected to the server
+    deferrals.update(`Hello ${name}. Your discord roles are currently being checked...`); // updates the message on the users screen
     const src = global.source;
     
-    for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) {
+    for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) { // finds the users discord ID
         const identifier = GetPlayerIdentifier(src, i);
 
         if (identifier.includes('discord:')) {
             discordIdentifier = identifier.slice(8);
         }
     } 
-    console.log(priorityQueue.front().element)
-    addToQueue(discordIdentifier , src, name);
+    console.log(priorityQueue.front().element)  //temporary debug logs
+    addToQueue(discordIdentifier , src); // add the player to the queue
     var intervalId = setInterval(function () {
         for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) {
             const identifier = GetPlayerIdentifier(src, i);
@@ -22,28 +25,27 @@ on('playerConnecting', (name, setKickReason, deferrals) => {
                 discordIdentifier = identifier.slice(8);
             }
         } 
-        SetConvar("sv_maxclients", 1)
         x = 0;
-        checkQueue(x, (cb) => {
+        checkQueue(x, (cb) => { //checks if there is open server slots
             if(cb == true) {
-                if(priorityQueue.front().element == discordIdentifier) {
-                    deferrals.done();
+                if(priorityQueue.front().element == discordIdentifier) { // checks if the user is number 1 in the queue
+                    deferrals.done(); // allows the user to connect to the server
                     x = 1
-                    removeFromQueue(discordIdentifier);
-                    clearInterval(intervalId);
+                    removeFromQueue(discordIdentifier); //removes the user from the queue (after 10 seconds to prevent more than one user to connect at the same time)
+                    clearInterval(intervalId); // stops the interval
                 }
                 else {
-                    deferrals.update(`You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`);
+                    deferrals.update(`You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`); //updates the queue message and adds the queue posistion
                 }
             }
             else {
-                deferrals.update(`You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`);
+                deferrals.update(`You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`); //updates the queue message and adds the queue posistion
             }
         })
     }, 10000);
 })
 
-setInterval(function removeGhostUsers() {
+setInterval(function removeGhostUsers() { //removes users that have disconnected from the server from the queue
     for (var i = 0; i < priorityQueue.items.length; i++) {
         if(GetPlayerName(priorityQueue.items[i].source) == null){
             if(config.settings.debug) {
@@ -54,11 +56,11 @@ setInterval(function removeGhostUsers() {
     }
 }, 30000)
 
-setInterval(function () {
+setInterval(function () { // temporary debug function
     console.log("[DEBUG] Queue: " + priorityQueue.printQueue())
 }, 10000)
 
-function addToQueue (identifier, src, name) {
+function addToQueue (identifier, src) { // adds a user to the queue
     emit('sPerms:getPerms', src, (perms) => {
         userPerms = perms;
         let prio 
@@ -76,14 +78,14 @@ function addToQueue (identifier, src, name) {
                 prio = 4
             break;
         }
-        priorityQueue.insert(identifier, prio, src, name);
+        priorityQueue.insert(identifier, prio, src);
         if (config.settings.debug) {
             console.log(`[DEBUG] ${identifier} has been added to the queue with priority ${prio}`)
         }
     })
 };
 
-function removeFromQueue(identifier) {
+function removeFromQueue(identifier) { // removes a user from the queue 
     setTimeout(function() {for (var i = 0; i < priorityQueue.items.length; i++) {
         if (priorityQueue.items[i].element == identifier) {
             priorityQueue.items.splice(i, 1);
@@ -96,7 +98,7 @@ function removeFromQueue(identifier) {
     }, 10100)
 }
 
-function findInQueue(identifier) {
+function findInQueue(identifier) { // find the user's placement in the queue
     for (var i = 0; i < priorityQueue.items.length; i++) {
         if (priorityQueue.items[i].element == identifier) {
             return i;
@@ -104,7 +106,7 @@ function findInQueue(identifier) {
     }
 }
 
-function checkQueue(x, cb) {
+function checkQueue(x, cb) { // check if the server is full
     if (GetNumPlayerIndices() + x < GetConvar("sv_maxclients")) {
         cb(true);
     }
@@ -113,26 +115,14 @@ function checkQueue(x, cb) {
     }
 }
 
-var zz = 0;
-function checkQueueTest(cb) {
-    if(zz == 1000) {
-        cb(true);
-    }
-    else {
-        zz++
-        cb(false);
-    }
-}
-
 // User defined class
 // to store elements and its priority
 class QElement {
-    constructor(element, priority, source, name)
+    constructor(element, priority, source)
     {
         this.element = element;
         this.priority = priority;
         this.source = source;
-        this.name = name;
     }
 }
 
@@ -149,7 +139,7 @@ class PriorityQueue {
     insert(element, priority, source, name)
     {
         // creating object from queue element
-        var qElement = new QElement(element, priority, source, name);
+        var qElement = new QElement(element, priority, source);
         var contain = false;
 
         // iterating through the entire item array to add element at the correct location of the Queue
