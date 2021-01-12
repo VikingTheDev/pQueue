@@ -1,7 +1,7 @@
 const config = require("./src/server.config.json");
 
 // TODO: Make it so a users connection will be interupted if a discord ID is not found. Find a more effective way to prevent more than one user from connecting at the same time.
-// Possibly reserve a few slots on the server for staff incase they have to get in server quickly. Add Adaptive Cards.
+// Possibly reserve a few slots on the server for staff incase they have to get in server quickly. Add Adaptive Cards. Integrate config file.
 
 on('playerConnecting', (name, setKickReason, deferrals) => {
     deferrals.defer(); // stops the user from being connected to the server
