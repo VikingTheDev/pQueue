@@ -8,7 +8,5 @@ description "FiveM queue with priority based on discord roles (Requires sPerms)"
 author "Petrikov"
 version "0.0.0"
 
--- client_script 'src/client/index.js'
 server_script 'src/server/index.js'
-
 client_script 'src/client/index.js'
