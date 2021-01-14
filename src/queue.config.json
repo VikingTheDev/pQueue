@@ -1,0 +1,34 @@
+{
+    "settings": {
+        "debug": false,
+        "alwaysUse": false,
+        "noDiscordRejectMsg": "We could not find your Discord ID, please make sure Discord is running and that you're logged in." 
+    },
+    "adaptiveCard": {
+        "community_name": "Sunshine State RP",
+        "community_url": "https://i.imgur.com/dN0ljys.png",
+        "card_description": "While you're waiting waiting, join our Discord and check out our Instagram",
+        "button1_title": "Discord",
+        "button1_url": "https://discord.gg/ssrp",
+        "button2_title": "Instagram",
+        "button2_url": "https://instagram.com/ssrp.leo/"
+    },
+    "priority_setup": [
+        {
+            "category": "category",
+            "role": "headAdmin",
+            "prio": 1
+        },
+        {
+            "category": "category",
+            "role": "staff",
+            "prio": 2
+        },
+        {
+            "category": "category",
+            "role":  "donator",
+            "prio": 3
+        }
+    ],
+    "defaultPrio": 4  
+}

@@ -1,13 +1,15 @@
-const config = require("./src/server.config.json");
+const config = require("./src/queue.config.json");
 
 // TODO:
-// Possibly reserve a few slots on the server for staff incase they have to get in server quickly. Add Adaptive Cards. Integrate config file. Prevent the queue from triggering if there's plenty open spots.
+// Possibly reserve a few slots on the server for staff incase they have to get in server quickly.
+
+StopResource("hardcap"); // Stopping the hardcap resource as it will reject connections when the server is full and thus the queue won't work
+var msg;
 
 on('playerConnecting', (name, setKickReason, deferrals) => {
     deferrals.defer(); // stops the user from being connected to the server
     deferrals.update(`Hello ${name}. Your discord roles are currently being checked...`); // updates the message on the users screen
     const src = global.source;
-
     let idFound = false;
     for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) { // finds the users discord ID
         const identifier = GetPlayerIdentifier(src, i);
@@ -16,42 +18,73 @@ on('playerConnecting', (name, setKickReason, deferrals) => {
             discordIdentifier = identifier.slice(8);
             idFound = true;
         };
-    }; 
+    };
     if(!idFound) {
-        deferrals.done("We could not find your Discord ID, please make sure Discord is running and that you're logged in.");
-    }
-    console.log(priorityQueue.front().element)  //temporary debug logs
+        deferrals.done(config.settings.noDiscordRejectMsg); //rejects the connecting user if they don't have a dicsord ID
+    }    
     addToQueue(discordIdentifier , src); // add the player to the queue
     var intervalId = setInterval(function () {
         for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) {
             const identifier = GetPlayerIdentifier(src, i);
-    
             if (identifier.includes('discord:')) {
                 discordIdentifier = identifier.slice(8);
             }
         } 
+        if (!isUserInQueue(discordIdentifier)) { // stops the interval if the user is no longer in the queue
+            clearInterval(intervalId);
+        }
         checkQueue((cb) => { //checks if there is open server slots
             if(cb == true) {
-                if(priorityQueue.front().element == discordIdentifier) { // checks if the user is number 1 in the queue
-                    deferrals.done(); // allows the user to connect to the server
-                    clearInterval(intervalId); // stops the interval
+                if (GetConvar("sv_maxclients") - GetNumPlayerIndices() > 4) { //Checks if there's more than 5 open slots
+                    if(config.settings.alwaysUse)  { // checks if the alwaysUse setting is enabled
+                        if(priorityQueue.front().element == discordIdentifier) { // checks if the user is number 1 in the queue
+                            deferrals.done(); // allows the user to connect to the server
+                            console.log(`Connecting: ${name}`) // since hardcap is stopped we have to log connecting users
+                            clearInterval(intervalId); // stops the interval
+                        }
+                        else {
+                            msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
+                            updateCard(callback => { // call the function to update the adaptive card content
+                                deferrals.presentCard(callback); // update the card on client side
+                            })
+                        }
+                    }
+                    else { // if there's more than 5 open slots and the alwaysUse setting is not disabled allow the user to connect without going through the queue
+                        deferrals.done();
+                    }
                 }
                 else {
-                    deferrals.update(`You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`); //updates the queue message and adds the queue posistion
+                    if(priorityQueue.front().element == discordIdentifier) { // checks if the user is number 1 in the queue
+                        deferrals.done(); // allows the user to connect to the server
+                        console.log(`Connecting: ${name}`) // since hardcap is stopped we have to log connecting users
+                        clearInterval(intervalId); // stops the interval
+                    }
+                    else {
+                        msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
+                            updateCard(callback => { // call the function to update the adaptive card content
+                                deferrals.presentCard(callback); // update the card on client side
+                            })
+                    }
                 }
             }
             else {
-                deferrals.update(`You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`); //updates the queue message and adds the queue posistion
+                msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
+                            updateCard(callback => { // call the function to update the adaptive card content
+                                deferrals.presentCard(callback); // update the card on client side
+                            })
             }
         })
     }, 500);
 })
 
-onNet('pQueue:shiftQueue', () => {
+onNet('pQueue:shiftQueue', () => { //Removes the user in posistion 1 once they have connected to the server
+    if(config.settings.debug) {
+        console.log(`[DEBUG] ${priorityQueue.front().element} has been removed from the queue.`)
+    }
     priorityQueue.remove();
 })
 
-setInterval(function removeGhostUsers() { //removes users that have disconnected from the server from the queue
+setInterval(function removeGhostUsers() { //checks for and removes ghost users every 15 seconds
     for (var i = 0; i < priorityQueue.items.length; i++) {
         if(GetPlayerName(priorityQueue.items[i].source) == null){
             if(config.settings.debug) {
@@ -60,31 +93,34 @@ setInterval(function removeGhostUsers() { //removes users that have disconnected
             removeFromQueue(priorityQueue.items[i].element)
         }
     }
-}, 30000)
+}, 15000)
 
 if (config.settings.debug) {
-    setInterval(function () { // temporary debug function
+    setInterval(function () { // debug function that prints the queue every 15 seconds
         console.log("[DEBUG] Queue: " + priorityQueue.printQueue())
-    }, 10000);
+    }, 15000);
 };
+
+function isUserInQueue (identifier) { // Checks if the user is still in the queue 
+    let b = false;
+    for(let i = 0; i < priorityQueue.items.length; i++) {
+        if (priorityQueue.items[i].element == identifier) {
+            b = true;
+            return b;
+        }
+    }
+}
 
 function addToQueue (identifier, src) { // adds a user to the queue
     emit('sPerms:getPerms', src, (perms) => {
         userPerms = perms;
-        let prio 
-        switch (true) {
-            case userPerms.category.donoBypass: 
-                prio = 1
-            break;
-            case userPerms.category.staff:
-                prio = 2
-            break;
-            case userPerms.category.donator:
-                prio = 3
-            break;
-            default:
-                prio = 4
-            break;
+        let prio = config.defaultPrio; 
+        for (let i = 0; i < config.priority_setup.length; i++) {
+            let setup = config.priority_setup[i];
+            if(userPerms[setup.category][setup.role]) {
+                prio = setup.prio;
+                break;
+            }
         }
         priorityQueue.insert(identifier, prio, src);
         if (config.settings.debug) {
@@ -94,16 +130,15 @@ function addToQueue (identifier, src) { // adds a user to the queue
 };
 
 function removeFromQueue(identifier) { // removes a user from the queue 
-    setTimeout(function() {for (var i = 0; i < priorityQueue.items.length; i++) {
+    for (var i = 0; i < priorityQueue.items.length; i++) {
         if (priorityQueue.items[i].element == identifier) {
             priorityQueue.items.splice(i, 1);
+            if (config.settings.debug) {
+                console.log(`[DEBUG] ${identifier} has been removed from the queue.`)
+            }
             break;
         };
     }
-    if (config.settings.debug) {
-        console.log(`[DEBUG] ${identifier} has been removed from the queue. \nQueue: ${priorityQueue.printQueue()}`)
-    }
-    }, 10100)
 }
 
 function findInQueue(identifier) { // find the user's placement in the queue
@@ -206,3 +241,101 @@ class PriorityQueue {
 }
 
 var priorityQueue = new PriorityQueue();
+
+function updateCard(callback) { // Updates the adaptive card content and sends a callback with said content so that it can be sent to the user
+    var card = {
+        "type":"AdaptiveCard",
+        "body":[
+            {
+                "type":"Image",
+                "url": config.adaptiveCard.community_url,
+                "horizontalAlignment":"Center"
+            },
+            {
+                "type":"Container",
+                "items":
+                [
+                    {
+                        "type":"TextBlock",
+                        "text": config.adaptiveCard.community_name,
+                        "wrap":true,
+                        "fontType":"Default",
+                        "size":"ExtraLarge",
+                        "weight":"Bolder",
+                        "color":"light",
+                        "horizontalAlignment":"Center"
+                    },
+                    {
+                        "type":"TextBlock",
+                        "text": msg,
+                        "wrap":true,
+                        "size":"Large",
+                        "weight":"Bolder",
+                        "color":"Light",
+                        "horizontalAlignment":"Center"
+                    },
+                    {
+                        "type":"TextBlock",
+                        "text": config.adaptiveCard.card_description,
+                        "wrap":true,
+                        "color":"Light","size":"Medium",
+                        "horizontalAlignment":"Center"
+                    },
+                    {
+                        "type":"ColumnSet","height":"stretch",
+                        "minHeight":"35px","bleed":true,
+                        "horizontalAlignment":"Center",
+                        "columns":
+                        [
+                            {
+                                "type":"Column",
+                                "width":"stretch",
+                                "items":
+                                [
+                                    {
+                                        "type":"ActionSet",
+                                        "actions":
+                                        [
+                                            {
+                                                "type":"Action.OpenUrl",
+                                                "title": config.adaptiveCard.button1_title,
+                                                "url": config.adaptiveCard.button1_url,
+                                                "style":"positive"
+                                            }
+                                        ]
+                                    }
+                                ],
+                                "height":"stretch"
+                            },
+                            {
+                                "type":"Column","width":"stretch",
+                                "items":
+                                [
+                                    {
+                                        "type":"ActionSet",
+                                        "actions":
+                                        [
+                                            {
+                                                "type":"Action.OpenUrl",
+                                                "title": config.adaptiveCard.button2_title,
+                                                "style":"positive",
+                                                "url": config.adaptiveCard.button2_url
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "style":"default",
+                "bleed":true,
+                "height":"automatic",
+                "isVisible":true
+            }
+        ],
+        "$schema":"http://adaptivecards.io/schemas/adaptive-card.json",
+        "version":"1.3"
+    }
+    callback(card);
+}
