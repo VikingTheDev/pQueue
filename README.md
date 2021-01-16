@@ -1,7 +1,7 @@
 # pQueue
 
 This is a FiveM server queue with discord based priority built on [SpaceTheDev](https://github.com/SpaceTheDev/)'s Discord API.
-You **NEED** [sPerms](https://forum.cfx.re/t/release-sperms-real-time-discord-perms/1686063) and [sDiscord](https://forum.cfx.re/t/release-sdiscord/168002) for this resource to work.
+You **NEED** [sPerms](https://forum.cfx.re/t/release-sperms-real-time-discord-perms/1686063) and [sDiscord](https://forum.cfx.re/t/release-sdiscord/1680021) for this resource to work.
 
 # Installation
 Copy or download the resource in your resource folder, and add ``ensure pQueue`` to your ``server.cfg``
@@ -44,7 +44,7 @@ The next section is for customizing the Adaptive Card UI presented to users whil
 
 
 
-The third and the final section is the most complicated to set up as it requires an understanding of how [sPerms](https://forum.cfx.re/t/release-sperms-real-time-discord-perms/1686063) and [sDiscord](https://forum.cfx.re/t/release-sdiscord/168002) works, as well as some experience with working with objects in JS. But if you follow all the following steps you should be able to set everything up without problems:
+The third and the final section is the most complicated to set up as it requires an understanding of how [sPerms](https://forum.cfx.re/t/release-sperms-real-time-discord-perms/1686063) and [sDiscord](https://forum.cfx.re/t/release-sdiscord/1680021) works, as well as some experience with working with objects in JS. But if you follow all the following steps you should be able to set everything up without problems:
 
 1. Download and set up sDiscord and sPerms
 
