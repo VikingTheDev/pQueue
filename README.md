@@ -102,7 +102,7 @@ Here is an example for how you could set up the priority:
     "prio": 3
 }
 ```
-**NOTE: Make sure you sort the priority from highest to lowest, if not the script will not use your highest priority if a user has multiple roles**
+**NOTE: Make sure you sort the priority from highest to lowest, if not the script might not use the highest priority if a user has multiple roles**
 
 Lastly, set ``defaultPrio`` to a higher number than all the priority roles/categories, in the last example it would be ``4`` or higher.
 
