@@ -25,18 +25,18 @@ In the config file you will find three different sections the first being the se
 
 
 
-The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be pretty obvious what the different settings do, see the screenshot or the comments down below if you're still unsure. 
-**Note: If you copy this over to your config file the comments HAVE to be removed**
+The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be obvious what the different settings do, see the screenshot or the comments down below if you are still unsure. 
+**Note: If you copy this over to your config file the comments MUST be removed**
 ```js
 "adaptiveCard": {
-        "card_title_isVisible": false, // decides whether or not the title is visble, defaults to false as you'll most likely have your community name in the header
-        "card_title": "Title", // the cards title, recommended use is for your community's name
+        "card_title_isVisible": false, // decides whether the title is visible, defaults to false as you will most likely have your community name in the header.
+        "card_title": "Title", // the cards title, recommended use is for your community's name.
         "card_header": "https://i.ibb.co/6DWQg68/dxIwJT3.png", // a link to the header picture
         "card_description": "card description", // a short description can be used for messages such as "While you're waiting check out our Discord"
         "button1_title": "Button 1", // The title for the first button
-        "button1_url": "https://discord.gg/ssrp", // The URL the first button should open
+        "button1_url": "https://discord.gg/ssrp", // The URL the first button should open.
         "button2_title": "Button 2", // The title for the second button
-        "button2_url": "https://instagram.com/ssrp.leo/" // The URL the second button should open
+        "button2_url": "https://instagram.com/ssrp.leo/" // The URL the second button should open.
     },
 ```
 ![Alt text](https://i.ibb.co/7CT9rQK/Screenshot-29.png "Adaptive Card Layout")
@@ -44,7 +44,7 @@ The next section is for customizing the Adaptive Card UI presented to users whil
 
 
 
-The third and the final section is the most complicated to set up as it requires an understanding of how [sPerms](https://forum.cfx.re/t/release-sperms-real-time-discord-perms/1686063) and [sDiscord](https://forum.cfx.re/t/release-sdiscord/168002) works, aswell as some experience with working with objects in JS. But if you follow all the following steps you should be able to set everything up without problems:
+The third and the final section is the most complicated to set up as it requires an understanding of how [sPerms](https://forum.cfx.re/t/release-sperms-real-time-discord-perms/1686063) and [sDiscord](https://forum.cfx.re/t/release-sdiscord/168002) works, as well as some experience with working with objects in JS. But if you follow all the following steps you should be able to set everything up without problems:
 
 1. Download and set up sDiscord and sPerms
 
@@ -80,7 +80,7 @@ When sPerms builds the ``perms`` object it checks each individual role, but also
 ```
 ``category`` If you want to check for an individual role this should be the category the role is under, ex. staff. If you want to check for a whole category this should just be "category"
 
-``role`` If you're checking for a role, this should be the name of the role, ex. owner. If you're checking a whole category it should be the name of the category ex. staff.
+``role`` If you are checking for a role, this should be the name of the role, ex. owner. If you are checking a whole category it should be the name of the category ex. staff.
 
 ``prio`` This is the priority, the lower the number the higher the priority. (Use whole numbers)
 
