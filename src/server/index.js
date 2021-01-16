@@ -1,7 +1,6 @@
 const config = require("./src/queue.config.json");
 
-// TODO:
-// Possibly reserve a few slots on the server for staff incase they have to get in server quickly.
+// Originally written by devpetrikov for use in Sunshine State RP (discord.gg/ssrp)
 
 StopResource("hardcap"); // Stopping the hardcap resource as it will reject connections when the server is full and thus the queue won't work
 var msg;
@@ -248,7 +247,7 @@ function updateCard(callback) { // Updates the adaptive card content and sends a
         "body":[
             {
                 "type":"Image",
-                "url": config.adaptiveCard.community_url,
+                "url": config.adaptiveCard.card_header,
                 "horizontalAlignment":"Center"
             },
             {
@@ -257,13 +256,14 @@ function updateCard(callback) { // Updates the adaptive card content and sends a
                 [
                     {
                         "type":"TextBlock",
-                        "text": config.adaptiveCard.community_name,
+                        "text": config.adaptiveCard.card_title,
                         "wrap":true,
                         "fontType":"Default",
                         "size":"ExtraLarge",
                         "weight":"Bolder",
                         "color":"light",
-                        "horizontalAlignment":"Center"
+                        "horizontalAlignment":"Center",
+                        "isVisible": config.adaptiveCard.card_title_isVisible
                     },
                     {
                         "type":"TextBlock",

@@ -5,18 +5,19 @@
         "noDiscordRejectMsg": "We could not find your Discord ID, please make sure Discord is running and that you're logged in." 
     },
     "adaptiveCard": {
-        "community_name": "Sunshine State RP",
-        "community_url": "https://i.imgur.com/dN0ljys.png",
-        "card_description": "While you're waiting waiting, join our Discord and check out our Instagram",
-        "button1_title": "Discord",
-        "button1_url": "https://discord.gg/ssrp",
-        "button2_title": "Instagram",
-        "button2_url": "https://instagram.com/ssrp.leo/"
+        "card_title_isVisible": false,
+        "card_title": "Title",
+        "card_header": "https://i.ibb.co/6DWQg68/dxIwJT3.png",
+        "card_description": "card description",
+        "button1_title": "Button1",
+        "button1_url": "https://someurl.com",
+        "button2_title": "Button2",
+        "button2_url": "https://someurl.com"
     },
     "priority_setup": [
         {
             "category": "category",
-            "role": "headAdmin",
+            "role": "administration",
             "prio": 1
         },
         {
