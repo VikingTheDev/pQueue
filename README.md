@@ -74,7 +74,7 @@ When sPerms builds the ``perms`` object it checks each individual role, but also
 ```js
 {
   "category": "category",
-  "role": "roleName
+  "role": "roleName",
   "prio": 1
 }
 ```
