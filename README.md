@@ -23,7 +23,7 @@ In the config file you will find three different sections the first being the se
 
 ``noDiscordRejectMsg`` The message presented to a user when rejected for not having a Discord ID.
 
-``graceListTime`` How long a user that has just disconnect/crashed has too reconnect before they will be put at the end of the queue again
+``graceListTime`` How long a user that has just disconnect/crashed has too reconnect before they will be put at the end of the queue again. (In minutes)
 
 
 The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be obvious what the different settings do, see the screenshot or the comments down below if you are still unsure. 
