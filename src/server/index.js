@@ -5,6 +5,8 @@ const config = require("./src/queue.config.json");
 StopResource("hardcap"); // Stopping the hardcap resource as it will reject connections when the server is full and thus the queue won't work
 var msg;
 
+var graceList = [];
+
 on('playerConnecting', (name, setKickReason, deferrals) => {
     deferrals.defer(); // stops the user from being connected to the server
     deferrals.update(`Hello ${name}. Your discord roles are currently being checked...`); // updates the message on the users screen
@@ -68,13 +70,31 @@ on('playerConnecting', (name, setKickReason, deferrals) => {
             }
             else {
                 msg = `You are in queue [${findInQueue(discordIdentifier) + 1}/${priorityQueue.items.length}]`;
-                            updateCard(callback => { // call the function to update the adaptive card content
-                                deferrals.presentCard(callback); // update the card on client side
-                            })
+                    updateCard(callback => { // call the function to update the adaptive card content
+                        deferrals.presentCard(callback); // update the card on client side
+                    })
             }
         })
     }, 500);
 })
+
+on('playerDropped', (reason) => {
+    const src = global.source;
+    for (let i = 0; i < GetNumPlayerIdentifiers(src); i++) { // finds the users discord ID
+        const identifier = GetPlayerIdentifier(src, i);
+        if (identifier.includes('discord:')) {
+            discordIdentifier = identifier.slice(8);
+        };
+    };
+    graceListInsert(discordIdentifier);
+    setTimeout(function () {
+        graceListRemove(discordIdentifier);
+    }, config.settings.graceListTime * 60 * 1000)
+})
+
+setInterval(function () {
+    console.log(graceList);
+}, 15000)
 
 onNet('pQueue:shiftQueue', () => { //Removes the user in posistion 1 once they have connected to the server
     if(config.settings.debug) {
@@ -121,6 +141,12 @@ function addToQueue (identifier, src) { // adds a user to the queue
                 break;
             }
         }
+        for (let i = 0; i < graceList.length; i++) {
+            if (graceList[i] == identifier) {
+                prio = 1;
+                break;
+            }
+        }
         priorityQueue.insert(identifier, prio, src);
         if (config.settings.debug) {
             console.log(`[DEBUG] ${identifier} has been added to the queue with priority ${prio}`)
@@ -154,6 +180,23 @@ function checkQueue(cb) { // check if the server is full
     }
     else {
         cb(false);
+    }
+}
+
+function graceListInsert(id) {
+    graceList.push(id);
+    if(config.settings.debug) {
+        console.log(`[DEBUG] ${id} has been added to the grace list.`)
+    }
+}
+function graceListRemove(id) {
+    for (var i = 0; i < graceList.length; i++) {
+        if (graceList[i] == id) {
+            graceList.splice(i, 1);
+            if (config.settings.debug) {
+                console.log(`[DEBUG] ${discordIdentifier} has been removed from the grace list.`)
+            }
+        }
     }
 }
 
@@ -299,7 +342,6 @@ function updateCard(callback) { // Updates the adaptive card content and sends a
                                             {
                                                 "type":"Action.OpenUrl",
                                                 "title": config.adaptiveCard.button1_title,
-                                                "url": config.adaptiveCard.button1_url,
                                                 "style":"positive"
                                             }
                                         ]

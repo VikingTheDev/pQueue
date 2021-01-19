@@ -2,10 +2,11 @@
     "settings": {
         "debug": false,
         "alwaysUse": false,
-        "noDiscordRejectMsg": "We could not find your Discord ID, please make sure Discord is running and that you're logged in." 
+        "noDiscordRejectMsg": "We could not find your Discord ID, please make sure Discord is running and that you're logged in." ,
+        "graceListTime": 2
     },
     "adaptiveCard": {
-        "card_title_isVisible": false,
+        "card_title_isVisible": true,
         "card_title": "Title",
         "card_header": "https://i.ibb.co/6DWQg68/dxIwJT3.png",
         "card_description": "card description",
@@ -17,7 +18,7 @@
     "priority_setup": [
         {
             "category": "category",
-            "role": "administration",
+            "role": "headAdmin",
             "prio": 1
         },
         {
