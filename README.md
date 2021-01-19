@@ -13,7 +13,8 @@ In the config file you will find three different sections the first being the se
 "settings": {
         "debug": false,
         "alwaysUse": false,
-        "noDiscordRejectMsg": "Change Me" 
+        "noDiscordRejectMsg": "Change Me",
+        "graceListTime": 5
     }
 ```
 ``debug`` Will enable debug messages in your console, such as: users being added to the queue and their priority, users being removed from the queue and the queue itself.
@@ -22,7 +23,7 @@ In the config file you will find three different sections the first being the se
 
 ``noDiscordRejectMsg`` The message presented to a user when rejected for not having a Discord ID.
 
-
+``graceListTime`` How long a user that has just disconnect/crashed has too reconnect before they will be put at the end of the queue again
 
 
 The next section is for customizing the Adaptive Card UI presented to users while in the queue. Should be obvious what the different settings do, see the screenshot or the comments down below if you are still unsure. 
