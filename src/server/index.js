@@ -92,10 +92,6 @@ on('playerDropped', (reason) => {
     }, config.settings.graceListTime * 60 * 1000)
 })
 
-setInterval(function () {
-    console.log(graceList);
-}, 15000)
-
 onNet('pQueue:shiftQueue', () => { //Removes the user in posistion 1 once they have connected to the server
     if(config.settings.debug) {
         console.log(`[DEBUG] ${priorityQueue.front().element} has been removed from the queue.`)
